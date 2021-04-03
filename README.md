@@ -12,3 +12,7 @@ I won't know all commands yet, so will need to make sure I dump any unknown traf
 Initially, will be logging everything, just because.
 
 Will not be uploading dumps (pcaps or hex dumps), as they include serial numbers and passwords, and PII. Will save sanitised json or csv data instead.
+
+Some Credits:
+https://jhalon.github.io/reverse-engineering-protocols/ - Helped me realise that there was a checksum (and I also used the code in there as a base for my own decoding).
+https://www.scadacore.com/tools/programming-calculators/online-checksum-calculator/ - Helped me work out the checksum type for the data.

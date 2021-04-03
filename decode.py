@@ -11,7 +11,7 @@ from crccheck.crc import Crc16Modbus
 def read_bytes(f, l):
     bytes = f.read(l)
     if len(bytes) != l:
-        print("Only received: %s" % (bytes))
+        print("Expected: %d, Only received: %d" % (l, len(bytes)))
         raise Exception("Not enough bytes in stream")
     return bytes
 
