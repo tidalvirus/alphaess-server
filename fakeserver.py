@@ -6,7 +6,10 @@ import socket
 import struct
 import time
 import string
+import logging
 from crccheck.crc import Crc16Modbus
+
+logging.basicConfig(level=logging.INFO)
 
 
 def server_program():
@@ -25,13 +28,13 @@ def server_program():
     # configure how many client the server can listen simultaneously
     server_socket.listen(1)
     conn, address = server_socket.accept()  # accept new connection
-    print("Connection from: " + str(address))
+    logging.info("Connection from: " + str(address))
     while True:
         # receive data stream. it won't accept data packet greater than 1024 bytes
         try:
             data = conn.recv(1024) #.decode('ascii','ignore')
         except ConnectionResetError:
-            print ("ConnectionResetError: Connection lost. Breaking")
+            logging.warning("ConnectionResetError: Connection lost. Breaking")
             break
 
         if not data:
@@ -56,26 +59,22 @@ def server_program():
                 # if data is not received break
                     break
                 data += extradata
-            print(f'Length Expect: {length}, Actual Length: {len(data)}, Remove: {headersize} + 2')
+            logging.debug(f'Length Expect: {length}, Actual Length: {len(data)}, Remove: {headersize} + 2')
             format_string = f'!{length}sH'
-            print(f'Format String: {format_string}')
+            logging.debug(f'Format String: {format_string}')
             content, checksum = struct.unpack_from(format_string, data, headersize)
             crc = Crc16Modbus.calc(data[:-2])
             if crc != checksum:
-                print(f'Error in Checksum! Received {checksum}, Got {crc}')
+                logging.error(f'Error in Checksum! Received {checksum}, Got {crc}')
 
         # ! = network type - big endian
         # H = 2 byte unsigned short integer (checksum)
         #struct.unpack_from("!H", data, headersize + length) # at end of data
 
-        # if data has {, it must be the beginning. Check if } is included in this string,
-        #   if so, parse and dump. If not, temporarily store.
-        # if data has }, it must be the end, if we previously had a {, merge with previous contents and dump
-        # if data does not have any braces, it might be a CSV table, or it might be the middle of a large packet (or an unknown)
-        #filtered_string = filter(lambda x: x in string.printable, str(data))
-        #print("RECEIVED: " + str(filtered_string))
-        print("RECEIVED: {}".format(data))
-        print(f'Content: {content}')
+        logging.debug("RECEIVED: {}".format(data))
+        logging.info(time.asctime(time.localtime(time.time())))
+        logging.info(f'F1: {val1}, F2: {val2}, F3: {val3}, Length: {length}')
+        logging.info(f'Content: {content}')
 
         # Response to auth
         if (val1 == 1, val2 == 1, val3 == 2):
@@ -91,7 +90,7 @@ def server_program():
         check = check + struct.pack('!H',crc)
 
         # Now for the reply
-        print("SENT: {}".format(check))
+        logging.debug("SENT: {}".format(check))
         # data = input(' -> ')
         conn.sendall(check)  # send data to the client
 
