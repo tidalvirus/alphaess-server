@@ -27,6 +27,9 @@ Check protocoldescription.md for my rough working out of what commands exist (ch
 
 Will not be uploading dumps (pcaps or hex dumps), as they include serial numbers and passwords, and PII. Will save sanitised json or csv data instead.
 
+### Calculating accurate time
+On the first data packet with current time from the battery (1,1,16 packets), calculate the clock drift/skew with UTC time, and store it, so that for all future data packets, we can just read the time from the battery and calculate for all future data captures. This way if the battery dumps more than one reading at a time, it can just be converted, and we can still get the data with no missing bits.
+
 ### Some Credits
-https://jhalon.github.io/reverse-engineering-protocols/ - Helped me realise that there was a checksum (and I also used the code in there as a base for my own decoding).
-https://www.scadacore.com/tools/programming-calculators/online-checksum-calculator/ - Helped me work out the checksum type for the data.
+* https://jhalon.github.io/reverse-engineering-protocols/ - Helped me realise that there was a checksum (and I also used the code in there as a base for my own decoding).
+* https://www.scadacore.com/tools/programming-calculators/online-checksum-calculator/ - Helped me work out the checksum type for the data.
