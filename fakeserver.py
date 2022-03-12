@@ -72,7 +72,14 @@ def server_program():
             # remove headers + checksum from size check
             while length > (len(data) - header_size - checksumsize):
                 # read more data
-                extradata = conn.recv(1024) #.decode('ascii','ignore')
+                try:
+                    extradata = conn.recv(1024) #.decode('ascii','ignore')
+                except ConnectionResetError:
+                    logging.error("ConnectionResetError: Connection lost. Breaking", exc_info=True)
+                    break
+                except socket.timeout:
+                    logging.error("Connection Timed out. Breaking", exc_info=True)
+                    break
                 if not data:
                 # if data is not received break
                     break
@@ -100,9 +107,8 @@ def server_program():
         #struct.unpack_from("!H", data, header_size + length) # at end of data
 
         logging.debug("RECEIVED: {}".format(data))
-        logging.info(time.asctime(time.localtime(time.time())))
-        logging.info(f'F1: {val1}, F2: {val2}, F3: {val3}, Length: {length}')
-        logging.info(f'Content: {content}')
+        #logging.info(time.asctime(time.localtime(time.time())))
+        logging.info(f'F1: {val1}, F2: {val2}, F3: {val3}, Length: {length}, Content: {content}')
 
         # Response to auth
         if (val1 == 1, val2 == 1, val3 == 2):
