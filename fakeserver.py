@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-
+""" Proof of Concept server to mimic www.alphaess.com for the Alpha ESS batteries """
 # Fake Server. Just says 'success'
-import binascii
 import socket
 import struct
-import time
-import string
 import logging
 from crccheck.crc import Crc16Modbus
 
@@ -14,6 +11,9 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s %(name)s %(message)s',le
 socket.setdefaulttimeout(60)
 
 def server_program():
+    """ Simple Test Serverv to receive data from the Alpha ESS battery
+        while it thinks it is talking to www.alphaess.com
+    """
     # get the hostname
     host = '10.1.1.35' # socket.gethostname()
     port = 7777 # initiate port no above 1024
@@ -33,7 +33,7 @@ def server_program():
     except socket.timeout:
         logging.error("Connection Timed out. Breaking", exc_info=True)
         return
-    logging.info("Connection from: " + str(address))
+    logging.info("Connection from: %s", str(address))
     while True:
         # receive data stream. it won't accept data packet greater than 1024 bytes
         try:
@@ -57,8 +57,10 @@ def server_program():
 
         if len(data) < header_size:
             # we don't seem to have a header, break out
-            logging.error(f'Error in Header Size! Received Data Length: {len(data)}, Expected Minimum: {header_size} ', exc_info=True)
-            logging.debug("RECEIVED: {}".format(data))
+            logging.error(
+                'Error in Header Size! Received Data Length: %d, Expected Minimum: %d ',
+                len(data), header_size, exc_info=True)
+            logging.debug("RECEIVED: %s", format(data))
             break
 
 
@@ -85,19 +87,23 @@ def server_program():
                     break
                 data += extradata
             if length != len(data) - header_size - 2:
-                logging.info(f'Error in received data! Length Expected: {length}, Actual Length of Data: {len(data) - header_size - 2}')
-                logging.debug("RECEIVED: {}".format(data))
+                logging.info(
+                    'Error in received data! Length Expected: %d, Actual Length of Data: %d', \
+                    length, len(data) - header_size - 2)
+                logging.debug("RECEIVED: %s", format(data))
             format_string = f'!{length}sH'
-            logging.debug(f'Format String: {format_string}')
+            logging.debug('Format String: %s', format_string)
             content, checksum = struct.unpack_from(format_string, data, header_size)
             crc = Crc16Modbus.calc(data[:-2])
             if crc != checksum:
-                logging.error(f'Error in Checksum! Received: {checksum}, Expected: {crc}', exc_info=True)
-                logging.debug("RECEIVED: {}".format(data))
+                logging.error('Error in Checksum! Received: %d, Expected: %d',
+                checksum, crc, exc_info=True)
+                logging.debug("RECEIVED: %s", format(data))
                 break
         else:
-            logging.debug("RECEIVED: {}".format(data))
-            logging.info(f'F1: {val1}, F2: {val2}, F3: {val3}, Length: {length}')
+            logging.debug("RECEIVED: %s", format(data))
+            logging.info('F1: %d, F2: %d, F3: %d, Length: %d',
+            val1, val2, val3, length)
             continue
 
 
@@ -106,25 +112,32 @@ def server_program():
         # H = 2 byte unsigned short integer (checksum)
         #struct.unpack_from("!H", data, header_size + length) # at end of data
 
-        logging.debug("RECEIVED: {}".format(data))
+        logging.debug("RECEIVED: %s", format(data))
         #logging.info(time.asctime(time.localtime(time.time())))
-        logging.info(f'F1: {val1}, F2: {val2}, F3: {val3}, Length: {length}, Content: {content}')
+        logging.info('F1: %d, F2: %d, F3: %d, Length: %d, Content: %s',
+        val1, val2, val3, length, content)
 
         # Response to auth
-        if (val1 == 1, val2 == 1, val3 == 2):
-            val2 = 2
-            data = '{"Status":"Success"}'
-        else:
-            val2 = 2
-            data = '{"Status":"Success"}'
+        # I have no idea why I wrote the below, but I feel like it might
+        # have something to do with different commands. Commenting out
+        # and will refer back if needed for the less proof of concept
+        # server.
+        # if (val1 == 1, val2 == 1, val3 == 2):
+        #     val2 = 2
+        #     data = '{"Status":"Success"}'
+        # else:
+        #     val2 = 2
+        #     data = '{"Status":"Success"}'
 
+        val2 = 2
+        data = '{"Status":"Success"}'
 
         check = struct.pack('!3bi', val1, val2, val3, len(data)) + bytes(data, encoding='ascii')
         crc = Crc16Modbus.calc(check)
         check = check + struct.pack('!H',crc)
 
         # Now for the reply
-        logging.debug("SENT: {}".format(check))
+        logging.debug("SENT: %s", format(check))
         # data = input(' -> ')
         conn.sendall(check)  # send data to the client
 
