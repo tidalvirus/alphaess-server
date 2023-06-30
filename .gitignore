@@ -141,3 +141,6 @@ cython_debug/
 dumps/
 dumps-backup/
 *.direct.json
+
+# macOS cruft
+.DS_Store
