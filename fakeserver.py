@@ -95,12 +95,13 @@ def server_program():
                     break
                 data += extradata
             if length != len(data) - header_size - 2:
-                logging.info(
+                logging.error(
                     "Error in received data! Length Expected: %d, Actual Length of Data: %d",
                     length,
                     len(data) - header_size - 2,
                 )
                 logging.debug("RECEIVED: %s", format(data))
+                break
             format_string = f"!{length}sH"
             logging.debug("Format String: %s", format_string)
             content, checksum = struct.unpack_from(format_string, data, header_size)

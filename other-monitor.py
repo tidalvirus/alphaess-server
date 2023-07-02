@@ -17,7 +17,7 @@ load_dotenv()
 
 
 # You can generate a Token from the "Tokens Tab" in the UI
-token = os.environ.get("INFLUXDB_OTHER_TOKEN")
+token = os.environ.get("INFLUXDB_TOKEN")
 org = os.environ.get("INFLUXDB_ORG")
 bucket = os.environ.get("INFLUXDB_OTHER_BUCKET")
 influx_host = os.environ.get("INFLUXDB_HOST")
