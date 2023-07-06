@@ -1,0 +1,7 @@
+id,Time,Date,Clear Date,Clear Time,Message
+1,00:05:03,2021/05/17,--,--, Battery Fault  
+2,22:25:48,2021/03/15,--,--, BMS Lost Fault 
+3,11:58:05,2021/03/04,--,--,Grid Meter Fault
+4,11:46:15,2021/03/04,--,--, BMS Lost Fault 
+5,11:45:35,2021/03/04,--,--, INV Comms Fault
+6,12:50:21,2021/01/06,--,--, INV Comms Fault
