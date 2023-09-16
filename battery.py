@@ -11,14 +11,13 @@ logging.basicConfig(
 )
 
 
-HEADER_FORMAT = "!3bi"
-CHECKSUM_SIZE = 2
-
-
 class Battery:
     """Methods to work with an Alpha ESS battery"""
 
+    HEADER_FORMAT = "!3bi"
+    CHECKSUM_SIZE = 2
     current_command = []
+    length = 0
 
     def get_header_size(self) -> int:
         """Return length of battery comms header
@@ -27,19 +26,17 @@ class Battery:
             int: header length
         """ """"""
 
-        header_size = struct.calcsize(HEADER_FORMAT)
+        header_size = struct.calcsize(self.HEADER_FORMAT)
         return header_size
 
-    def commands(self, data):
+    def get_command(self, data):
         """_summary_
 
         Args:
             data (_type_): _description_
         """
-        val1, val2, val3, length = struct.unpack_from(HEADER_FORMAT, data, 0)
+        val1, val2, val3, self.length = struct.unpack_from(self.HEADER_FORMAT, data, 0)
         self.current_command = [val1, val2, val3]
-
-        return length
 
     def reply(self) -> bytes:
         """_summary_
@@ -74,15 +71,13 @@ class Battery:
         Returns:
             bool: _description_
         """
-        format_string = f"!{self.commands(data)}sH"
+        format_string = f"!{self.length}sH"
         logging.debug("Format String: %s", format_string)
-        content, checksum = struct.unpack_from(
-            format_string, data, self.get_header_size()
-        )
+        checksum = struct.unpack_from(format_string, data, self.get_header_size())[1]
         crc = Crc16Modbus.calc(data[:-2])
         if crc != checksum:
             logging.error(
-                "Error in Checksum! Received: %d, Expected: %d",
+                "Received Checksum: %d, Expected Checksum: %d",
                 checksum,
                 crc,
                 exc_info=True,
@@ -90,5 +85,5 @@ class Battery:
             logging.debug("RECEIVED: %s", format(data))
             return False
         else:
-            logging.info("Checksum fine")
+            logging.info("Checksum OK")
         return True

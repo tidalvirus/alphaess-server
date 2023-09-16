@@ -65,17 +65,24 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
                     exc_info=True,
                 )
                 break
-
-            length = this_battery.commands(data)  # need length returned
+            this_battery.get_command(data)
+            length = this_battery.length  # need length of rest of data
 
             if length > 0:
                 # read more data
                 data = self.get_extra_data(this_battery, data=data, length=length)
-                if length != len(data) - this_battery.get_header_size() - 2:
+                if (
+                    length
+                    != len(data)
+                    - this_battery.get_header_size()
+                    - this_battery.CHECKSUM_SIZE
+                ):
                     logging.error(
                         "Error in received data! Length Expected: %d, Actual Length of Data: %d",
                         length,
-                        len(data) - this_battery.get_header_size() - 2,
+                        len(data)
+                        - this_battery.get_header_size()
+                        - this_battery.CHECKSUM_SIZE,
                     )
                     logging.debug("RECEIVED: %s", format(data))
                     break
@@ -110,7 +117,7 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
         Returns:
             bytes: _description_
         """
-        while length > (len(data) - battery.get_header_size() - 2):
+        while length > (len(data) - battery.get_header_size() - battery.CHECKSUM_SIZE):
             try:
                 extradata = self.request.recv(1024)  # .decode('ascii','ignore')
             except ConnectionResetError:

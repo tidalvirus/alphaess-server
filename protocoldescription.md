@@ -258,6 +258,6 @@ Neither of these would be a real problem if I could set the time on the battery.
 ## Insecurity of Reconnection Without Re-Authentication
 
 The battery seems to take a broken TCP connection to the server as just something to reconnect, and start sending data again. Does not provide login details, just starts streaming the data every 10 seconds as if nothing happened.
-Sure, the system is insecure in the first place, but this makes it even for a man in the middle, as the server doesn't block data being sent, nor does the battery seem to care that something happened to the TCP connection.
+Sure, the system is insecure in the first place, but this makes it even easier for a man in the middle attack, as the server doesn't block data being sent, nor does the battery seem to care that something happened to the TCP connection.
 
 I'm not sure how long the battery waits before it wants to authenticate again.
