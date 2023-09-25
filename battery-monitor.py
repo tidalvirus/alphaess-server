@@ -2,6 +2,7 @@
 """ Basic script to parse the 10 second outputs from fakeserver.py
 Just read the data from tailed log file
 tail -F <logfile> | battery-monitor.py"""
+# pylint: disable=invalid-name
 
 import sys, re, json, time, os
 

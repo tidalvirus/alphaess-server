@@ -93,9 +93,9 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
                 logging.debug("RECEIVED: %s", format(data))
                 logging.info(
                     "F1: %d, F2: %d, F3: %d, Length: %d",
-                    this_battery.current_command[0],
-                    this_battery.current_command[1],
-                    this_battery.current_command[2],
+                    this_battery.received_command[0],
+                    this_battery.received_command[1],
+                    this_battery.received_command[2],
                     length,
                 )
 

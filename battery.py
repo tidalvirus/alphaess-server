@@ -16,8 +16,9 @@ class Battery:
 
     HEADER_FORMAT = "!3bi"
     CHECKSUM_SIZE = 2
-    current_command = []
+    received_command = []
     length = 0
+    clock_drift = 0  # keep track of the time difference
 
     def get_header_size(self) -> int:
         """Return length of battery comms header
@@ -36,7 +37,7 @@ class Battery:
             data (_type_): _description_
         """
         val1, val2, val3, self.length = struct.unpack_from(self.HEADER_FORMAT, data, 0)
-        self.current_command = [val1, val2, val3]
+        self.received_command = [val1, val2, val3]
 
     def reply(self) -> bytes:
         """_summary_
@@ -45,22 +46,24 @@ class Battery:
             str: _description_
         """
 
-        self.current_command[1] = 2  # switch it to a reply
+        # We should never hit this - we only expected commands with a '1' in this position
+        if self.received_command[1] != 1:
+            raise UserWarning
+
         data = (
             '{"Status":"Success"}'  # this is all we send to the battery at this stage
         )
 
+        # Generate data for reply, and calculate checksum
         check = struct.pack(
             "!3bi",
-            self.current_command[0],
-            self.current_command[1],
-            self.current_command[2],
+            self.received_command[0],  # Always '1'
+            2,  # All replies (from this server) are '2'
+            self.received_command[2],
             len(data),
         ) + bytes(data, encoding="ascii")
         crc = Crc16Modbus.calc(check)
-        check = check + struct.pack("!H", crc)
-
-        return check
+        return check + struct.pack("!H", crc)
 
     def checksum_is_valid(self, data) -> bool:
         """_summary_
@@ -73,12 +76,15 @@ class Battery:
         """
         format_string = f"!{self.length}sH"
         logging.debug("Format String: %s", format_string)
-        checksum = struct.unpack_from(format_string, data, self.get_header_size())[1]
+
+        received_checksum = struct.unpack_from(
+            format_string, data, self.get_header_size()
+        )[1]
         crc = Crc16Modbus.calc(data[:-2])
-        if crc != checksum:
+        if crc != received_checksum:
             logging.error(
                 "Received Checksum: %d, Expected Checksum: %d",
-                checksum,
+                received_checksum,
                 crc,
                 exc_info=True,
             )
