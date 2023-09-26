@@ -7,6 +7,15 @@ See protocoldescription.md for my attempt at understanding the packet formats.
 
 Fake battery and fake server setup - the fake server can listen to a real battery, but it won't do a whole lot with the data - just output it to the terminal, and respond to /everything/ with a 'Status: Success'.
 
+## Alternatives ?
+I'm aware since I started this that there are some other smarter people doing some awesome work, here's a few I have found - note, I have not tested any of them, but I will likely be looking at their code for ideas :)
+
+* https://github.com/230delphi/alphaess-to-mqtt - for a similar thing written in Go! This one can either be considered a proxy (man in the middle type), or an interceptor - traffic still goes to the insecure Alpha ESS system, but you have way more control, and local access to boot. I was considering stopping development on my Python version and learning Go to modify this to be standalone, but I think I'll stick with my Python for now - it's a learning experience for me, writing my own TCP server. I do feel like this developer actually understands how this protocol works a lot better than I do. :)
+* https://github.com/CharlesGillanders/alphaess - from the page: "This Python library logs in to cloud.alphaess.com and retrieves data on your Alpha ESS inverter, photovoltaic panels, and battery if you have one." - upside, easy-ish to use, great way to get access to the data of your own battery. Downside, it still needs the battery to talk to the Internet, and all your queries are reliant on Alpha ESS's servers being up.
+* https://github.com/SorX14/alphaess_modbus - A way to access the data directly via Modbus! I've no idea how this really works, and I'm a bit scared that I'll break something, so I haven't seriously considered this.
+
+If any of the others had existed when I got my battery, I would probably never have started what I did :)
+
 ## Testing with fake battery / server
 
 Make sure that 'fakeserver.py' is listening on localhost '''host = '127.0.0.1''' and port 7778 in the code. Fake battery should be setup to connect to 127.0.0.1:7778 already.
