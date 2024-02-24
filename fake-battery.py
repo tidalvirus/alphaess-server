@@ -24,11 +24,16 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     sock.connect((HOST, PORT))
 
     files = [
-        "1-1-2.direct.json",
-        "1-1-9.direct.json",
+        #        "1-1-2.direct.json",
+        #        "1-1-4.direct.json",
+        #        "1-1-4.direct.json",
+        #        "1-1-9.direct.json",
         "1-1-16.direct.json",
-        "1-2-3.direct.json",
-        "1-1-4.direct.json",
+        #        "1-2-3.direct.json", This is something the server would send!
+        #       "1-1-4.direct.json",
+        #      "1-1-2.direct.json",
+        "1-1-16.direct.json",
+        "1-1-16.direct.json",
     ]
     print("Reading files")
     for filename in files:
@@ -45,9 +50,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         crc = Crc16Modbus.calc(check)
         check = check + struct.pack("!H", crc)
 
+        print("Sleeping before sending")
         print(f"Sending: {format(check)}")
+        time.sleep(1)
         sock.sendall(check)
-        print("Sleeping...")
+        print("Sleeping after sending")
         print(f"Sent:     {format(check)}")
         time.sleep(1)
     # sock.close()

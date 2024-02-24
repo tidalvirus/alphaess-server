@@ -4,14 +4,16 @@ Just read the data from tailed log file
 tail -F <logfile> | battery-monitor.py"""
 # pylint: disable=invalid-name
 
-import sys, re, json, time, os
-
+import json
+import os
+import re
+import sys
+import time
 from datetime import datetime
 
+from dotenv import load_dotenv
 from influxdb_client import InfluxDBClient  # , Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
-
-from dotenv import load_dotenv
 
 load_dotenv()
 

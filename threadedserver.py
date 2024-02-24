@@ -40,7 +40,7 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
         this_battery = Battery()
         # print(f"This battery is battery: {this_battery}")
 
-        print(f"Active threads: {threading.active_count()}")
+        logging.info("Active threads: %d", threading.active_count())
         while True:
             try:
                 data = self.request.recv(1024)  # , "ascii")
@@ -53,6 +53,7 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
             except TimeoutError:
                 logging.error("Connection Timed out. Breaking", exc_info=True)
                 break
+
             if not data:
                 # if data is not received break
                 break
@@ -65,11 +66,10 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
                     exc_info=True,
                 )
                 break
-            this_battery.get_command(data)
+            this_battery.get_command_and_length(data)
             length = this_battery.length  # need length of rest of data
 
-            if length > 0:
-                # read more data
+            if length > 0:  # if the battery is sending data, not just a command
                 data = self.get_extra_data(this_battery, data=data, length=length)
                 if (
                     length
@@ -86,19 +86,20 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
                     )
                     logging.debug("RECEIVED: %s", format(data))
                     break
-                if this_battery.checksum_is_valid(data) is False:
-                    logging.debug("RECEIVED: %s", format(data))
+                if this_battery.checksum_is_valid(data) is True:
+                    logging.debug("RECEIVED valid checksum: %s", format(data))
 
             else:
                 logging.debug("RECEIVED: %s", format(data))
                 logging.info(
                     "F1: %d, F2: %d, F3: %d, Length: %d",
-                    this_battery.received_command[0],
-                    this_battery.received_command[1],
-                    this_battery.received_command[2],
+                    this_battery.command_field[0],
+                    this_battery.command_field[1],
+                    this_battery.command_field[2],
                     length,
                 )
 
+            this_battery.handle_command(data)
             response = this_battery.reply()
             self.request.sendall(response)
             # cur_thread = threading.current_thread()
@@ -107,15 +108,15 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
             # self.request.sendall(response)
 
     def get_extra_data(self, battery: Battery, data: bytes, length: int) -> bytes:
-        """_summary_
+        """Get any extra data that was not received in the first request
 
         Args:
-            battery (Battery): _description_
-            data (bytes): _description_
-            length (int): _description_
+            battery (Battery): the Battery object
+            data (bytes): the original data
+            length (int): the total length of the data expected
 
         Returns:
-            bytes: _description_
+            bytes: the extra data added onto the original data
         """
         while length > (len(data) - battery.get_header_size() - battery.CHECKSUM_SIZE):
             try:
@@ -131,6 +132,7 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
                 break
             if not data:
                 # if data is not received break
+                logging.error("No data received", exc_info=True)
                 break
             data += extradata
         return data
@@ -143,8 +145,10 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
     def handle_error(self, request, client_address):
         """handle any exception that may occur"""
+        logging.exception("Exception occurred", exc_info=True)
+        #
 
-        print(f"An error occurred processing request from: {client_address}")
+        # print(f"An error occurred processing request from: {client_address}")
 
     # def handle_timeout(self):
     #     """Handle the case when no request is received within timeout"""

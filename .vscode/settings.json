@@ -4,7 +4,4 @@
         "editor.defaultFormatter": "ms-python.black-formatter"
     },
     "python.analysis.typeCheckingMode": "basic",
-    "python.linting.pylintEnabled": true,
-    "python.linting.enabled": true,
-    "python.linting.flake8Enabled": false
 }

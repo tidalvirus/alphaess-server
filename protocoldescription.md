@@ -27,7 +27,7 @@ Values seen from battery and server: 0, 2, 3, 4, 5, 8, 9, 12, 16
 - 2 - login request/response?
 - 3 - send serial number, get license + home address (WHY) + other info from server
 - 4 - battery dumps a bunch of info, similar to command 3 (10 or so packets after command 3).
-- 5 - battery dumps more info - just power related though
+- 5 - battery dumps more info - just power related though (every 5 minutes)
 - 8 - Server requesting last known received data? Battery response with success (what happens in failure?) (what is 'cmdindex'), after this starts a large dump (command 12)
 - 9 - Event log dump, next response after success is from server with a request (command 8)
 - 12/c - dump from battery in CSV with \n line endings. Each packet with CSV headers is responded to with a success from server
@@ -232,6 +232,9 @@ And back to regular data push after this, one time, then 'data dump 2'
 ## Data Dump 2
 
 #### Battery:
+
+1, 1, 5
+
 ```{"Time":"2021/03/24 10:02:40","SN":"[serialnumremoved]","Ppv1":"1243","Ppv2":"1228","Upv1":"270.3","Upv2":"273.0","Ua":"248.2","Ub":"0.0","Uc":"0.0","Fac":"50.00","Ubus":"383","PrealL1":"1640","PrealL2":"0.0","PrealL3":"0.0","Tinv":"38","PacL1":"5000","PacL2":"822","PacL3":"0.0","InvWorkMode":"3","EpvTotal":"433.0","Einput":"60.00","Eoutput":"128.40","Echarge":"143.9","PmeterL1":"-4","PmeterL2":"0","PmeterL3":"0","PmeterDC":"1071","Pbat":"-708.8640","SOC":"33.6","BatV":"49.92","BatC":"-14.20","FlagBms":"257","BmsWork":"1","Pcharge":"4949","Pdischarge":"4949","BmsRelay":"3","BmsNum":"1","VcellLow":"17173759","VcellHigh":"17501442","TcellLow":"17170453","TcellHigh":"16908310","IdTempelover":"0","IdTempEover":"0","IdTempediffe":"0","IdChargcurre":"0","IdDischcurre":"0","IdCellvolover":"0","IdCellvollower":"0","IdSoclower":"0","IdCellvoldiffe":"0","BatC1":"-14.00","BatC2":"0.00","BatC3":"0.00","BatC4":"0.00","BatC5":"0.00","BatC6":"0.00","SOC1":"33.6","SOC2":"0.0","SOC3":"0.0","SOC4":"0.0","SOC5":"0.0","SOC6":"0.0","ErrInv":"0","WarInv":"0","ErrEms":"0","ErrBms":"0","ErrMeter":"0","ErrBackupBox":"0","EGridCharge":"2.9","EDischarge":"138.6","EmsStatus":"Normal","InvBatV":"50.60","BmsShutdown":"0","BmuRelay":"0","BmsHardVer1":"0", "BmsHardVer2":"0", "BmsHardVer3":"0","DispatchSwitch":"0","Pdispatch":"0", "DispatchSoc":"0", "DispatchMode":"0","PMeterDCL1":"1071","PMeterDCL2":"0", "PMeterDCL3":"0","MeterDCUa":"248.3","MeterDCUb":"0.0", "MeterDCUc":"0.0","Eirp":"-63","CSQ":"99,99"}```
 
 #### Server:
