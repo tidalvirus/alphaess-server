@@ -37,7 +37,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     ]
     print("Reading files")
     for filename in files:
-        with open(filename, "rb") as f:
+        with open(f"tests/{filename}", "rb") as f:
             data = f.read()
         f.close()
         length = len(data)

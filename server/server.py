@@ -38,6 +38,7 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         this_battery = Battery()
+        self.request.settimeout(30)
         # print(f"This battery is battery: {this_battery}")
 
         logging.info("Active threads: %d", threading.active_count())
