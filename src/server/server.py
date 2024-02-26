@@ -13,7 +13,7 @@ import socketserver
 # import time
 import logging
 
-from battery import Battery
+from server.battery import Battery
 
 # import json
 # from datetime import datetime
@@ -39,7 +39,7 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         this_battery = Battery()
         self.request.settimeout(30)
-        # print(f"This battery is battery: {this_battery}")
+        logging.info("This battery is battery: %s", this_battery)
 
         logging.info("Active threads: %d", threading.active_count())
         while True:
@@ -66,6 +66,10 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
                     this_battery.get_header_size(),
                     exc_info=True,
                 )
+                # raise ValueError
+                # raise ValueError(
+                #     f"Length Expected: {this_battery.get_header_size()}, Actual Length of Data: {len(data)}"
+                # )
                 break
             this_battery.get_command_and_length(data)
             length = this_battery.length  # need length of rest of data
@@ -86,6 +90,9 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
                         - this_battery.CHECKSUM_SIZE,
                     )
                     logging.debug("RECEIVED: %s", format(data))
+                    raise ValueError(
+                        "Length Expected: {length}, Actual Length of Data: {actual_length}"
+                    )
                     break
                 if this_battery.checksum_is_valid(data) is True:
                     logging.debug("RECEIVED valid checksum: %s", format(data))

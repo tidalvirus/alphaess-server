@@ -146,7 +146,7 @@ class Battery:
                 return True
             elif self.command_field[2] == BatteryCommandType.BATTERYDATA.value:
                 logging.info("Regular Data received")
-                self.get_battery_data(self.get_data(data))
+                self.set_battery_data(self.get_data(data))
                 return True
             else:
                 logging.error("Unhandled command received")
@@ -155,7 +155,7 @@ class Battery:
             logging.error("Unhandled command received")
             return False
 
-    def get_battery_data(self, data: str) -> bool:
+    def set_battery_data(self, data: str) -> bool:
         """Store the most recent 10 second dump from the battery in the dataclass
 
         Args:
