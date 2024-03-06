@@ -75,8 +75,17 @@ class Battery:
         elif key == "Uc":
             return "battery_uc"
         # Otherwise, return the key as it is
-        else:  # return a lowercased key
+        elif len(key) > 2:  # return a lowercased key
             return key.lower()
+        else:
+            raise ValueError(
+                "Unknown or unexpected key: "
+                + key
+                + " - "
+                + str(type(key))
+                + " - "
+                + str(key)
+            )
 
     def reply(self) -> bytes:
         """Handles replies from the battery
@@ -142,7 +151,7 @@ class Battery:
         if self.command_field[0] == 1 and self.command_field[1] == 1:
             if self.command_field[2] == BatteryCommandType.BATTERYDUMP.value:
                 logging.info("Data Dump received")
-                self.get_battery_dump(self.get_data(data))
+                self.set_battery_dump(self.get_data(data))
                 return True
             elif self.command_field[2] == BatteryCommandType.BATTERYDATA.value:
                 logging.info("Regular Data received")
@@ -164,17 +173,25 @@ class Battery:
         Returns:
             bool: True if successful read, False otherwise
         """
-        hashed = json.loads(data)
-        latest_battery_data = BatteryData("", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-        for key, value in hashed.items():
-            setattr(latest_battery_data, self.get_attribute_name(key), value)
-            logging.debug("Key: %s, Value: %s", key, value)
-        logging.debug("Latest Battery Data: %s", latest_battery_data)
-        latest_battery_data = dataclasses.make_dataclass("BatteryData", hashed.keys())
-        logging.debug("Latest Battery Data - hashed.keys: %s", latest_battery_data)
-        return False
+        try:
+            hashed = json.loads(data)
+            latest_battery_data = BatteryData(
+                "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            )
+            for key, value in hashed.items():
+                setattr(latest_battery_data, self.get_attribute_name(key), value)
+                logging.debug("Key: %s, Value: %s", key, value)
+            logging.debug("Latest Battery Data: %s", latest_battery_data)
+            latest_battery_data = dataclasses.make_dataclass(
+                "BatteryData", hashed.keys()
+            )
+            logging.debug("Latest Battery Data - hashed.keys: %s", latest_battery_data)
+            return True
+        except (json.JSONDecodeError, KeyError) as e:
+            logging.error("Failed to set battery data: %s", str(e))
+            return False
 
-    def get_battery_dump(self, data: str) -> bool:
+    def set_battery_dump(self, data: str) -> bool:
         """Store the larger 5 minute data dump from the battery in the dataclass
 
         Args:
@@ -183,105 +200,111 @@ class Battery:
         Returns:
             bool: True if successful read, False otherwise
         """
-        loaded_json = json.loads(data)
-        latest_battery_dump = BatteryDump(
-            "",
-            "",
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            "",
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            "",
-        )
-        for key, value in loaded_json.items():
-            setattr(latest_battery_dump, self.get_attribute_name(key), value)
-            logging.debug("Key: %s, Value: %s", key, value)
-        latest_battery_dump = dataclasses.make_dataclass(
-            "BatteryDump", ((k, type(v)) for k, v in loaded_json.items())
-        )
-        return False
+        try:
+            loaded_json = json.loads(data)
+            latest_battery_dump = BatteryDump(
+                "",
+                "",
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                "",
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                "",
+            )
+            for key, value in loaded_json.items():
+                setattr(latest_battery_dump, self.get_attribute_name(key), value)
+                logging.debug("Key: %s, Value: %s", key, value)
+            logging.debug("Latest Battery Fump: %s", latest_battery_dump)
+            latest_battery_dump = dataclasses.make_dataclass(
+                "BatteryDump", ((k, type(v)) for k, v in loaded_json.items())
+            )
+            logging.debug("Latest Battery Dump - hashed.keys: %s", latest_battery_dump)
+            return True
+        except (json.JSONDecodeError, KeyError) as e:
+            logging.error("Failed to set battery data: %s", str(e))
+            return False
 
 
 ## Creating the below may have been a design error.

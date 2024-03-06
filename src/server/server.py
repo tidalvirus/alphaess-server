@@ -66,10 +66,7 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
                     this_battery.get_header_size(),
                     exc_info=True,
                 )
-                # raise ValueError
-                # raise ValueError(
-                #     f"Length Expected: {this_battery.get_header_size()}, Actual Length of Data: {len(data)}"
-                # )
+
                 break
             this_battery.get_command_and_length(data)
             length = this_battery.length  # need length of rest of data
@@ -93,7 +90,6 @@ class BatteryTCPHandler(socketserver.BaseRequestHandler):
                     raise ValueError(
                         "Length Expected: {length}, Actual Length of Data: {actual_length}"
                     )
-                    break
                 if this_battery.checksum_is_valid(data) is True:
                     logging.debug("RECEIVED valid checksum: %s", format(data))
 
