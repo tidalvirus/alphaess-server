@@ -1,3 +1,5 @@
+# archived, as apparently the firmware now has encrypyted connections, and I have allowed a third party to have control of the battery.
+
 # This is a WIP.
 
 # Fake www.alphaess.com Server
